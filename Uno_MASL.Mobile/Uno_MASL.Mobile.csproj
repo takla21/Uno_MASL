@@ -21,6 +21,9 @@
     <UseInterpreter Condition="'$(Configuration)' == 'Debug' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'">True</UseInterpreter>
     <IsUnoHead>true</IsUnoHead>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
+    <ProvisioningType>manual</ProvisioningType>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Uno.Resizetizer" Version="1.3.0" />

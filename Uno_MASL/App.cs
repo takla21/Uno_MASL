@@ -39,6 +39,9 @@ namespace Uno_MASL
                 .WithAuthority(AzureCloudInstance.AzurePublic, _tenantId)
                 .WithRedirectUri(_redirectUrl)
                 .WithUnoHelpers()
+#if __IOS__
+                .WithIosKeychainSecurityGroup("com.test.maslmobile")
+#endif
                 .Build();
 
             // Do not repeat app initialization when the Window already has content,
