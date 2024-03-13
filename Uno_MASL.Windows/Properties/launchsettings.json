@@ -1,0 +1,10 @@
+{
+	"profiles": {
+		"Uno_MASL.Windows (Unpackaged)": {
+			"commandName": "Project"
+		},
+		"Uno_MASL.Windows (Package)": {
+			"commandName": "MsixPackage"
+		}
+	}
+}

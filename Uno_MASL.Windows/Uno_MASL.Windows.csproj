@@ -1,0 +1,97 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
+    <RootNamespace>Uno_MASL.Windows</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+
+    <!-- Bundles the WinAppSDK binaries -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+    <!-- <SelfContained>true</SelfContained> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Images\**" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Uno.Resizetizer" Version="1.3.0" />
+    <PackageReference Include="Uno.WinUI" Version="5.1.87" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+    <PackageReference Include="Uno.Core.Extensions.Logging.Singleton" Version="4.0.1" />
+    <PackageReference Include="Uno.UI.Adapter.Microsoft.Extensions.Logging" Version="5.1.87" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+    If you encounter this error message:
+
+      error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
+      Please update to a newer .NET SDK in order to reference this assembly.
+
+    This means that the two packages below must be aligned with the "build" version number of
+    the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
+    must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
+    -->
+    <!-- <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.22621.28" />
+    <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.22621.28" /> -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Uno_MASL\Uno_MASL.csproj" />
+  </ItemGroup>
+
+  <!--
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix"/>
+  </ItemGroup>
+
+  <!--
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+
+  <Import Project="..\Uno_MASL.Base\base.props" />
+
+  <!-- Workaround for this issue https://github.com/unoplatform/uno/issues/14555 -->
+  <Target Name="ResolveWebView2CoreDuplicates1" BeforeTargets="_ComputeResolvedFilesToPublishTypes" AfterTargets="ComputeFilesToPublish">
+    <Message Importance="high" Text ="Applying workaround to resolve Microsoft.Web.WebView2.Core.dll duplication in package (1)" />
+    <ItemGroup>
+      <_WebView2CoreFilesToExclude Include="@(ResolvedFileToPublish)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core'"/>
+    </ItemGroup>
+    <ItemGroup Condition="'@(_WebView2CoreFilesToExclude->Count())' &gt; 1">
+      <_WebView2CoreFilesToExclude Remove="@(_WebView2CoreFilesToExclude)" Condition="$([System.String]::Copy(%(FullPath)).Contains('.nuget'))"/>
+      <ResolvedFileToPublish Remove="@(_WebView2CoreFilesToExclude)" />
+    </ItemGroup>
+    <Message Importance="high" Text ="Removed: @(_WebView2CoreFilesToExclude)" />
+  </Target>
+
+  <Target Name="ResolveWebView2CoreDuplicates2" BeforeTargets="_ComputeAppxPackagePayload" AfterTargets="GetPackagingOutputs">
+    <Message Importance="high" Text ="Applying workaround to resolve Microsoft.Web.WebView2.Core.dll duplication in package (2)" />
+    <ItemGroup >
+      <_WebView2CoreOutputsToExclude Include="@(PackagingOutputs)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core'"/>
+    </ItemGroup>
+    <ItemGroup Condition="'@(_WebView2CoreOutputsToExclude->Count())' &gt; 1">
+      <_WebView2CoreOutputsToExclude Remove="@(_WebView2CoreOutputsToExclude)" Condition="$([System.String]::Copy(%(FullPath)).Contains('.nuget'))"/>
+      <PackagingOutputs Remove="@(_WebView2CoreOutputsToExclude)" />
+    </ItemGroup>
+    <Message Importance="high" Text ="Removed: @(_WebView2CoreOutputsToExclude)" />
+  </Target>
+</Project>

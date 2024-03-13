@@ -1,0 +1,14 @@
+﻿<Page x:Class="Uno_MASL.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:Uno_MASL"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+  <StackPanel HorizontalAlignment="Center"
+              VerticalAlignment="Center">
+    <TextBlock Text="Try to login with MASL" />
+
+    <Button Content="Login"
+            Click="Button_Click" />
+  </StackPanel>
+</Page>
